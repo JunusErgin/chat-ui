@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            background-color: #D9DBD5;
+            font-family: 'Open Sans', sans-serif;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        .bg-header {
+            height: 20vh;
+            background-color: #009688;
+        }
+        
+        .chat-container {
+            position: fixed;
+            top: 100px;
+            right: 15%;
+            left: 15%;
+            bottom: 50px;
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.1);
+        }
+        
+        .bg-default {
+            background: #EDEDED;
+        }
+        
+        .header {
+            height: 40px;
+            width: 100%;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            padding-left: 16px;
+        }
+        
+        #chatMessegeContainer {
+            background-color: #DCD5CD;
+            flex: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: flex-end;
+        }
+        
+        .chat-input-container {
+            height: 60px;
+            background-color: #F0F0F0;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 8px;
+        }
+        
+        .chat-input-container input {
+            border: none;
+            border-radius: 8px;
+            min-height: 40px;
+            flex: 1;
+            font-size: 16px;
+            padding-left: 16px;
+            margin-left: 8px;
+            outline: unset;
+        }
+        
+        .chat-input-container input::placeholder {
+            font-weight: 300;
+            color: rgba(0, 0, 0, 0.4);
+        }
+        
+        .chat-input-container img {
+            filter: opacity(0.5);
+            margin: 0 8px;
+        }
+        
+        .message {
+            padding: 8px;
+            background-color: #DCF8C6;
+            border-radius: 8px;
+            min-width: 50%;
+            margin: 8px;
+            position: relative;
+            font-size: 14px;
+        }
+        
+        .foreign-message {
+            margin-right: auto;
+            background-color: white;
+        }
+        
+        .message-date {
+            position: absolute;
+            right: 4px;
+            bottom: 4px;
+            font-size: 10px;
+            color: rgba(0, 0, 0, 0.7);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-header">
+
+    </div>
+
+    <div class="chat-container">
+        <div class="header bg-default">
+            Chat Messenger
+        </div>
+
+        <div id="chatMessegeContainer">
+
+        </div>
+        <form class="chat-input-container" onsubmit="sendMessage();return false;">
+            <img src="./img/outline_emoji_emotions_black_24dp.png" alt="">
+            <img src="./img/outline_attach_file_black_24dp.png" alt="">
+            <input id="typedMessage" type="text" placeholder="Schreibe eine Nachricht">
+            <img src="./img/outline_mic_black_24dp.png" alt="">
+        </form>
+    </div>
+
+
+    <script>
+        let messages = loadMessages();
+
+        setInterval(() => {
+            messages = loadMessages();
+            render();
+        }, 2000);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const user = urlParams.get('user') || 'me';
+
+        function render() {
+            let chatMessegeContainer = document.getElementById('chatMessegeContainer');
+            chatMessegeContainer.innerHTML = '';
+
+            messages.forEach((msg) => {
+                const extraClass = msg.author != user ? 'foreign-message' : '';
+                chatMessegeContainer.innerHTML += `
+                <div class="message ${extraClass }">
+                    ${msg.text}
+                    ${parseDate(msg)}
+                </div>`;
+            });
+        }
+        render();
+
+
+        function parseDate(msg) {
+            let date = new Date(msg.date || new Date());
+            let parsedDate = date.getHours() + ':' + ('0' + date.getMinutes()).slice(-2);
+            return `<span class="message-date">${parsedDate}</span>`;
+        }
+
+        function sendMessage() {
+            let typedMessage = document.getElementById('typedMessage');
+            messages.push({
+                text: typedMessage.value,
+                author: user,
+                date: new Date().getTime()
+            });
+
+            render();
+            save();
+            typedMessage.value = '';
+        }
+
+        function save() {
+            localStorage.setItem('messages', JSON.stringify(messages));
+        }
+
+        function loadMessages() {
+            let ls = JSON.parse(localStorage.getItem('messages'));
+            return ls || [{
+                text: 'Hallo',
+                author: 'me',
+                date: 1634298941225
+            }, {
+                text: 'Wie gehts?',
+                author: 'me',
+                date: 1634298941225
+            }];
+        }
+    </script>
+</body>
+
+</html>
